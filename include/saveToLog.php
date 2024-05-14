@@ -1,8 +1,8 @@
 <?php
 
 /*
-    ver 1.1.0 
-    date: 10.04.2024
+    ver 1.2.0
+    date: 02.05.2024
     who changed it: Admin_2
 */
 
@@ -36,6 +36,20 @@ function saveToLogTxt($input)
 }
 
 
+// сохранить в файл с ошибками
+function saveLogAppendTxt($input)
+{
+    $date_current = date('d-m-Y H:i:s');
+    $title =  PHP_EOL
+        . '__________   '
+        . $date_current
+        . '   __________'
+        . PHP_EOL
+        . PHP_EOL;
+    $save =  file_put_contents('logs/' . 'general_log' . '.txt', print_r($title, 1) . PHP_EOL, FILE_APPEND);
+    $save =  file_put_contents('logs/' . 'general_log' . '.txt', print_r($input, 1) . PHP_EOL, FILE_APPEND);
+    return $save;
+}
 // сохранить в файл с ошибками
 function saveERRORToLogTxt($input)
 {
