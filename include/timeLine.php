@@ -1,7 +1,7 @@
 <?php
 
 /*
-    ver 1.0.0 
+    ver 1.0.0
     date: 02.05.2024
     who changed it: Admin_2
 */
@@ -15,7 +15,6 @@ function getTimeLineComment($id)
             'id' => $id
         ]
     );
-
     return $result;
 }
 
@@ -28,14 +27,12 @@ function updateTimeLineComment($id, $fields)
             "fields" => $fields
         ]
     );
-
     return $result;
 }
 
 //TODO результат постраничный, необходимо выбрать все страницы
 function getTimeLineListComments($entityID, $entityType, $select = null, $order = null)
 {
-
     /* пример
     $result = CRest::call(
     'crm.timeline.comment.list',
@@ -56,7 +53,6 @@ function getTimeLineListComments($entityID, $entityType, $select = null, $order 
 );
 
 */
-
     $result = CRest::call(
         'crm.timeline.comment.list',
         [
@@ -68,6 +64,5 @@ function getTimeLineListComments($entityID, $entityType, $select = null, $order 
             "order" => $order,
         ]
     );
-
     return $result;
 }

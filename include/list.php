@@ -1,12 +1,12 @@
 <?php
 
 /*
-    ver 1.0.0 
+    ver 1.0.0
     date: 02.05.2024
     who changed it: Admin_2
 */
 
-// Получение данных с 
+// Получение данных с
 function listGetInfo($IBLOCK_TYPE_ID, $IBLOCK_CODE = null, $IBLOCK_ID = null, $SOCNET_GROUP_ID = null, $order = null)
 {
     $result = CRest::call(
@@ -22,7 +22,7 @@ function listGetInfo($IBLOCK_TYPE_ID, $IBLOCK_CODE = null, $IBLOCK_ID = null, $S
     return $result;
 }
 
-// Получение данных с 
+// Получение данных с
 function listElementGetInfo($IBLOCK_TYPE_ID, $IBLOCK_CODE = null, $IBLOCK_ID = null, $SOCNET_GROUP_ID = null, $order = null, $ELEMENT_CODE = null, $ELEMENT_ID = null, $FILTER = null)
 {
     $result = CRest::call(

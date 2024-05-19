@@ -1,7 +1,7 @@
 <?php
 
 /*
-    ver 1.0 
+    ver 1.0
     date: 07.05.2024
     who changed it: Admin_1
 */

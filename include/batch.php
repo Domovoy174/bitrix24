@@ -23,20 +23,37 @@ function sendLittleBatch($arr)
 }
 
 
+/**
+ * The function `sendBigBatch` divides a given array into smaller batches, sends requests with a
+ * specified delay, and aggregates the results into a final array.
+ *
+ * @param arr The `sendBigBatch` function you provided seems to be designed to handle a large batch of
+ * requests by splitting them into smaller batches and sending them sequentially with a delay between
+ * each batch.
+ * @param requestDelay The `requestDelay` parameter in the `sendBigBatch` function represents the delay
+ * in microseconds between each batch request. In the provided code, the default value for
+ * `requestDelay` is set to `500000` microseconds, which is equivalent to half a second (0.5 seconds).
+ *
+ * @return The function `sendBigBatch` returns an array `` which contains the results of
+ * sending a large batch of requests. The array may include results, errors, next pages, total results,
+ * and timing information for each batch. Additionally, if any result contains more than 50 items, the
+ * function will make additional requests to retrieve all items and add them to the final result array.
+ */
+
 function sendBigBatch($arr, $requestDelay = 500000)
 {
 
     /*
     Пример arr
 
-    $arr['deal_' . $deal_id] = 'crm.item.list?'. 
+    $arr['deal_' . $deal_id] = 'crm.item.list?'.
     http_build_query(array(
         "entityTypeId" => 158,
         "filter" => [
             "parentId2" => $deal_id
         ]
     ));
-    
+
 */
 
 
