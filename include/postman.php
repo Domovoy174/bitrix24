@@ -45,3 +45,16 @@ function getSimpleRequest($url)
     curl_close($curl);
     return $response;
 }
+
+// отправляем ответ на входящий запрос
+function responseJson($res)
+{
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($res);
+}
+// отправляем ответ на входящий запрос
+function responseError404($resString)
+{
+    header('X-PHP-Response-Code: 404', true, 404);
+    echo $resString;
+}

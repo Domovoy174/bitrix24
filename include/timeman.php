@@ -1,7 +1,7 @@
 <?php
 
 /*
-    ver 1.0.0 
+    ver 1.0.0
     date: 17.05.2024
     who changed it: Admin_2
 */
@@ -37,6 +37,18 @@ function settingDay($id)
         'timeman.settings',
         [
             'USER_ID' => $id
+        ]
+    );
+    return $result;
+}
+
+// Метод позволяет получить рабочий график по его идентификатору.
+function scheduleGet($id)
+{
+    $result = CRest::call(
+        'timeman.schedule.get',
+        [
+            'id' => $id
         ]
     );
     return $result;

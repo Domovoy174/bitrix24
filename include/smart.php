@@ -1,10 +1,22 @@
 <?php
 
 /*
-    ver 1.2.0 
+    ver 1.2.0
     date: 15.04.2024
     who changed it: Admin_2
 */
+// Отдает информацию о полях смарт-процесса с идентификатором entityTypeId
+function smartFieldsGetinfo($entityTypeId)
+{
+    $result = CRest::call(
+        'crm.item.fields',
+        [
+            "entityTypeId" => $entityTypeId
+        ]
+    );
+    return $result;
+}
+
 
 
 function smartGetinfo($entityTypeId, $smart_item_id)
@@ -115,6 +127,22 @@ function smartUpgrade($entityTypeId, $smartElementId, $fields)
             "entityTypeId" => $entityTypeId,
             "id" => $smartElementId,
             'fields' => $fields,
+        ]
+    );
+    return $result;
+}
+
+function smart_NO_Upgrade($entityTypeId, $smartElementId, $fields)
+{
+    $result = CRest::call(
+        'crm.item.update',
+        [
+            "entityTypeId" => $entityTypeId,
+            "id" => $smartElementId,
+            'fields' => $fields,
+            'params' => [
+                'REGISTER_SONET_EVENT' => 'N'
+            ]
         ]
     );
     return $result;

@@ -1,7 +1,7 @@
 <?php
 
 /*
-    ver 1.0.0 
+    ver 1.0.0
     date: 04.04.2024
     who changed it: Admin_2
 */
@@ -27,6 +27,18 @@ function contactUpdate($contactID, $fields)
         'crm.contact.update',
         [
             'id' => $contactID,
+            'fields' => $fields,
+        ]
+    );
+    return $result;
+}
+
+//Добавление контакта
+function contactAdd($fields)
+{
+    $result = CRest::call(
+        'crm.contact.add',
+        [
             'fields' => $fields,
         ]
     );

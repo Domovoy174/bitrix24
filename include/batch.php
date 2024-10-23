@@ -214,3 +214,173 @@ function sendBigBatch($arr, $requestDelay = 500000)
     }
     return $res_full_arr;
 }
+
+
+
+function sendFullBatch($arr)
+{
+    /*
+    Пример arr
+
+    $arrBatchGetLead = null;
+    foreach ($arrayID as $key => $lead_id) {
+        $methodBatch = 'crm.lead.list';
+        $arrBatchGetLead['lead_list_' . $lead_id] = $methodBatch . '?' .
+            http_build_query(
+                [
+                    "order" => [
+                        "STATUS_ID" => "ASC"
+                    ],
+                    "filter" => [
+                        "*"
+                    ],
+                ]
+            );
+    }
+
+    */
+    // инициализация переменных
+    $requestDelay = (int)0;
+    // итоговый массив
+    $result_full = [
+        "results" => [
+            "full_result" => [],
+            "full_result_error" => [],
+            "full_result_total" => [],
+            "full_result_next" => [],
+            "full_result_time" => [],
+        ],
+        "full_time" => [],
+        "sleep" => [],
+        "total_batch_execution_time_percent" => (int)0,
+        "total_batch_execution_time" => (int)0,
+        "last_operating_reset_at" => (int)0,
+        "requestDelay" => (int)0,
+    ];
+    echo "<br>";
+    echo "-------- arr  --------- Входной массив START ---------------------";
+    echo "<br>";
+    echo "<pre>";
+    print_r($arr);
+    echo "</pre>";
+    echo "<br>";
+    echo "-----------------------  Входной массив END ---------------------------";
+    echo "<br>";
+    // проверяем на существование массива и элементов в нем
+    if (isset($arr) and count($arr) > 0) {
+
+        // инициализация переменных
+        // массив для временного хранения данных
+        $result_temp = [];
+        // максимальное количество элементов в batch
+        $max_element = 45;
+        // максимальное время processing при выполнении batch
+        $max_time_processing = 480;
+        //
+        $arr_chunk = (array_chunk($arr, $max_element, true));
+
+        // echo "<br>";
+        // echo "-------- arr_chunk  ---------arr_chunk  START ---------------------";
+        // echo "<br>";
+        // echo "<pre>";
+        // print_r($arr_chunk);
+        // echo "</pre>";
+        // echo "<br>";
+        // echo "----------------------- arr_chunk END ---------------------------";
+        // echo "<br>";
+
+        // отправляем каждый batch по отдельности с задержкой между ними
+        foreach ($arr_chunk as $key => $arr_piece) {
+            // echo "<br>";
+            // echo "-------- arr_piece  ---------arr_piece  START ---------------------";
+            // echo "<br>";
+            // echo "<pre>";
+            // print_r($arr_piece);
+            // echo "</pre>";
+            // echo "<br>";
+            // echo "----------------------- arr_piece END ---------------------------";
+            // echo "<br>";
+            // номер отправки batch
+            $number_batch = (int)1;
+            // отправляем запрос
+            $result_full = request_batch($result_full, $arr_piece, $number_batch,  $max_time_processing);
+            $number_batch++;
+
+            // // переменная для завершения цикла
+            // $repeat_process = (bool)false;
+            // do {
+            // } while ($repeat_process);
+        }
+    } else {
+        // нет входного массива или количество элементов равно нулю
+        $result_full["error_FATAL"] = 'нет входного массива или количество элементов равно нулю';
+    }
+    return $result_full;
+}
+
+
+
+
+
+function request_batch($result_full, $arr_piece, $number_batch,  $max_time_processing)
+{
+    // задержка
+    sleep($result_full["requestDelay"]);
+    // отправляем первый batch
+    $result_temp = CRest::call(
+        'batch',
+        [
+            'halt' => '0',
+            'cmd' => $arr_piece,
+        ]
+    );
+
+    // объединяем все результаты в итоговый
+    if (isset($result_temp["result"]["result"])) {
+        $result_full["results"]["full_result"] = array_merge($result_full["results"]["full_result"], $result_temp["result"]["result"]);
+    }
+    // объединяем все total (общее количество) в итоговый
+    if (isset($result_temp["result"]["result_total"])) {
+        $result_full["results"]["full_result_total"] = array_merge($result_full["results"]["full_result_total"], $result_temp["result"]["result_total"]);
+    }
+    // объединяем все начало следующей страницы  в итоговый
+    if (isset($result_temp["result"]["result_next"])) {
+
+        $result_full["results"]["full_result_next"] = array_merge($result_full["results"]["full_result_next"], $result_temp["result"]["result_next"]);
+    }
+    // объединяем все время  в итоговый
+    if (isset($result_temp["result"]["result_time"])) {
+        $result_full["results"]["full_result_time"] = array_merge($result_full["results"]["full_result_time"], $result_temp["result"]["result_time"]);
+    }
+    // объединяем все ошибки в итоговый
+    if (isset($result_temp["result"]["result_error"])) {
+        $result_full["results"]["full_result_error"] = array_merge($result_full["results"]["full_result_error"], $result_temp["result"]["result_error"]);
+    }
+    // объединяем все записи времени итоговый
+    if (isset($result_temp["time"])) {
+        $result_full["full_time"] = array_merge($result_full["full_time"], ["time_batch_$number_batch" => $result_temp["time"]]);
+        if (isset($result_temp["time"]["processing"])) {
+            $result_full["total_batch_execution_time"] =  $result_full["total_batch_execution_time"] + $result_temp["time"]["processing"];
+            $result_full["total_batch_execution_time_percent"] =  ceil(($result_full["total_batch_execution_time"] / $max_time_processing) * 100);
+        }
+        if (isset($result_temp["time"]["operating_reset_at"])) {
+            $result_full["last_operating_reset_at"] =  $result_temp["time"]["operating_reset_at"];
+        }
+    }
+
+
+    // если время processing больше чем 70% от $max_time_processing то ставим паузу
+    if (isset($result_full["last_operating_reset_at"]) and isset($result_full["total_batch_execution_time"]) and ceil(($result_full["total_batch_execution_time"] / $max_time_processing) * 100) > 70) {
+        // ставим задержку на половину от времени окончания
+        $current_time = time();
+        $result_full["requestDelay"] =  ceil($result_full["last_operating_reset_at"] - $current_time);
+        $result_full["sleep"] = array_merge($result_full["sleep"], ["sleep_batch_$number_batch" => $result_full["requestDelay"]]);
+    } elseif (isset($result_full["total_batch_execution_time"]) and ceil(($result_full["total_batch_execution_time"] / $max_time_processing) * 100) > 70) {
+        // ставим задержку на половину 5 сек
+        $result_full["requestDelay"] =  ceil(5);
+        $result_full["sleep"] = array_merge($result_full["sleep"], ["sleep_batch_$number_batch" => $result_full["requestDelay"]]);
+    }
+
+
+    return $result_full;
+}
